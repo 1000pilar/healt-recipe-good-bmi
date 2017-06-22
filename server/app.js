@@ -1,39 +1,45 @@
 const express = require('express')
-const bodyParser = require('body-parser')
-const mongoose = require('mongoose')
-const cors = require('cors')
+    , bodyParser = require('body-parser')
+    , passport = require('passport')
+    , LocalStrategy = require('passport-local')
+    , bcrypt = require('bcrypt')
+    , cors = require('cors')
+    , mongoose = require('mongoose')
+    , users = require('./routes/users.js')
+    , bmi = require('./routes/bmi.js')
+    , foods = require('./routes/foods.js')
+    , User = require('./models/user.js')
 
-// var db_config = {
-//      development : 'mongodb://localhost/bodymass'
-//      // test :  'mongodb://localhost/bodymass-test'
-// }
-
-mongoose.connect('mongodb://localhost/bodymass', ()=>{
-     console.log('connect to Database');
-});
-
-// var app_env = app.settings.env
-
-mongoose.Promise = require('bluebird')
-
-// mongoose.connect(db_config[app_env], function(){
-//      console.log('connect to db bodymass' + db_config[app_env]);
-// })
-
-var app = express();
-
-var apibmi = require('./router/bmi')
-var users = require('./router/users');
+const app = express()
 
 app.use(cors())
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended : false }))
-
-app.use('/apibmi', apibmi)
-app.use('/api/users', users)
-
-app.listen(3000, ()=>{
-     console.log('connected');
+mongoose.Promise = global.Promise
+mongoose.connect('mongodb://localhost/bmi-health', ()=>{
+  console.log(`run in environment database mongodb!!`);
 })
 
-module.exports = app;
+passport.use(new LocalStrategy(
+  function (username, password, done){
+    User.findOne({username: username}, function(err, user){
+      if (err) { return done(err); }
+      if (!user) { return done(null, {message: `username or password invalid`}); }
+      if (!bcrypt.compareSync(password, user.password)) { return done(null, {message: `password invalid`}); }
+      return done(null, user);
+    })
+  }
+))
+
+
+
+
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended: false}))
+
+app.use('/users', users)
+app.use('/bmi', bmi)
+app.use('/foods', foods)
+
+app.listen(3000, ()=>{
+  console.log(`Connect to port 3000`);
+})
+
