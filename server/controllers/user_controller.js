@@ -4,6 +4,40 @@ var bcrypt = require('bcrypt')
 var jwt = require('jsonwebtoken')
 require('dotenv').config()
 
+
+var signinFacebook = (req, res)=>{
+     User.findOne({
+     email : req.body.email
+})
+.then((query)=>{
+if(query){
+               var token = jwt.sign({
+                    id : query._id,
+                    username : query.username,
+                    email : query.email,
+               }, process.env.JWT_SECRET, {expiresIn : '1h'})
+               res.send({
+                    token : token
+               })
+}else{
+     User.create({
+          username : req.body.username,
+          email : req.body.email
+     })
+     .then((result)=>{
+          var token = jwt.sign({
+                         id : result._id,
+                         username : result.username,
+                         email : result.email
+                    }, process.env.JWT_SECRET, {expiresIn : '1h'})
+                         res.send({
+                         token : token
+                    })
+     })
+}
+})
+}
+
 var SignUp = (req,res,next) =>{
      User.findOne({username : req.body.username})
      .then ((docs)=>{
@@ -185,6 +219,7 @@ var updateUser = (req, res,next)=>{
 
 
 module.exports = {
+     signinFacebook,
      SignUp,
      SignIn,
      findAllUsers,

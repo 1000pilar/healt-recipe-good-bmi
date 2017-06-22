@@ -4,13 +4,15 @@
     <meta charset="utf-8">
     <title>Main</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.3/vue.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.1/axios.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.3/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.1/axios.min.js"></script> -->
     <link rel="stylesheet" href="css/style.css" />
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   </head>
   <body>
     <div id="app">
-               <nav class="navbar navbar-inverse">
+               <nav class="navbar navbar-default">
                  <div class="container-fluid">
                    <div class="navbar-header">
                      <a class="navbar-brand" href="/main.html">Food Recomendation</a>
@@ -25,28 +27,119 @@
                    </ul>
                  </div>
                </nav>
+
+               <div class="col-md-8">
+                    <div class="form-group">
+                      <label for="usr">Berat Badan :</label>
+                      <input type="text" class="form-control" id="usr" v-model="weight">
+                    </div>
+                    <div class="form-group">
+                      <label for="usr">Tinggi Badan :</label>
+                      <input type="text" class="form-control" id="usr" v-model="height">
+                    </div>
+
+                    <div class="form-group">
+                      <label for="usr">Jenis Kelamin :</label>
+                      <input type="text" class="form-control" id="usr" v-model="sex">
+                    </div>
+
+                    <div class="form-group">
+                      <label for="usr">Umur :</label>
+                      <input type="text" class="form-control" id="usr" v-model="age">
+                    </div>
+
+                    <button class="btn btn-default" type="button" name="button" @click="hitungBMI">Hitung BMI</button>
+
+                    <h4>Your Health Status  : {{ bmi.status }}</h4>
+                    <h4>Your Health Risk : {{ bmi.risk }}</h4>
+
+
+                    <!-- <div class="">
+                       <form class="">
+                         <input type="text" v-model="food">
+                         <button @click="getFood">Get Food</button>
+                       </form>
+                     </div>
+                     <ul v-for="recipe in foodList.hits">
+                       <li>{{recipe.recipe.label}}</li>
+                       <img v-bind:src="recipe.recipe.image" alt="">
+                     </ul> -->
+
+                </div>
     </div>
   </body>
   <script>
     var app = new Vue({
       el: '#app',
       data: {
-        text:'',
-        idtweet:''
+        weight:'',
+        height:'',
+        sex : '',
+        age: '',
+        bmi : ""
+     //    bmiList: {},
+     //  bmiValue: '',
+     //  food: '',
+     //  foodList: {},
+     //  recipes: []
+
       },
       methods:{
         logout() {
           window.localStorage.removeItem('token')
           window.location.href = "/index.html"
-        }
+     },
+
+     hitungBMI: function() {
+               console.log('Hitung bmi');
+               var self = this
+               axios.post('http://localhost:3000/apibmi', {
+                    weight : self.weight,
+                    height : self.height,
+                    sex : self.sex,
+                    age : self.age
+               }, {
+                    headers : {token : localStorage.getItem('token')}
+               })
+               .then((response)=>{
+                    console.log('abis then');
+                    console.log(JSON.stringify(response.data.body.bmi.status));
+                    bmi = self.response.data.body.bmi
+                    // bmiList = self.response.data,
+                    // bmiValue = self.bmiList.bmi.value
+               })
+               .catch((err) => {
+                    console.log(err);
+               })
+          },
+
+          getFood: function(){
+           console.log(this.food);
+           console.log(this.bmiValue);
+           const self = this
+           this.axios.post('http://localhost:3000/foods', {
+             value: self.bmiValue,
+             recipe: self.food
+           })
+           .then((response)=>{
+             console.log(response.data);
+             this.foodList = response.data
+             this.recipes = this.foodList.hits
+           })
+           .catch((err)=>{
+             console.log(err);
+           })
+         }
 
 
       },
-      created: function () {
+
+      created : function () {
         if(localStorage.getItem('token') == null){
-          window.location.href = "/index.html"
+          window.location.href = "/index.html";
         }
       }
+
     })
   </script>
 

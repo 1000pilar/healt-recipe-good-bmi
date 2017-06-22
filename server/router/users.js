@@ -7,7 +7,7 @@ router.post('/signup', Users.SignUp);
 router.post('/signin', Users.SignIn);
 router.post('/signinfacebook', Users.signinFacebook);
 
-router.get('/validation',  Users.validation)
+router.get('/validation',  Users.validation);
 
 router.get('/',  jwtHelper.verifyToken, Users.findAllUsers)
 router.get('/:id', jwtHelper.verifyToken, Users.findOneUser)
